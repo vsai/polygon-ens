@@ -12,3 +12,5 @@ npx hardhat node
 npx hardhat run scripts/deploy.js
 npx hardhat run scripts/deploy.js --network mumbai
 ```
+
+Can see the NFT on the mumbai testnet: https://testnet.rarible.com/collection/polygon/0x77ee47f54805f35f016502c3cca27f686b8903a7/items
