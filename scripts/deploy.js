@@ -7,23 +7,40 @@
 const hre = require("hardhat");
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const tld = "ysm";
+  const domainName = "fruitsrus";
 
-  const lockedAmount = hre.ethers.utils.parseEther("1");
+  // const domainContractFactory = await hre.ethers.getContractFactory('Domains');
+  // const domainContract = await domainContractFactory.deploy(tld);
+  // await domainContract.deployed();
+  // console.log("Contract deployed to:", domainContract.address);
 
-  const Lock = await hre.ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const contractAddress = "0x4f407294c7336835d079d59c1db64500ed86ae34";
+  const domainContract = await hre.ethers.getContractAt("Domains", contractAddress);
 
-  await lock.deployed();
+  let txn = await domainContract.register(domainName, { value: hre.ethers.utils.parseEther("0.1") });
+  await txn.wait();
+  console.log(`Minted domain ${domainName}.${tld}`);
 
-  console.log("Lock with 1 ETH deployed to:", lock.address);
+  txn = await domainContract.setRecord(domainName, "setting record for the domain");
+  await txn.wait();
+  console.log(`Set record for: ${domainName}.${tld}`);
+
+  const address = await domainContract.getAddress(domainName);
+  console.log(`Owner of ${domainName}.${tld}:`, address);
+
+  const balance = await hre.ethers.provider.getBalance(domainContract.address);
+  console.log(`Contract balance:`, hre.ethers.utils.formatEther(balance));
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+const runMain = async () => {
+  try {
+    await main();
+    process.exit(0);
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
+};
+
+runMain();
