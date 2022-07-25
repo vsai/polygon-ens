@@ -22,12 +22,27 @@ contract Domains is ERC721URIStorage {
 
   mapping(string => address) public domains;
   mapping(string => string) public records;
+  mapping(uint => string) public names;
+
+  error Unauthorized();
+  error AlreadyRegistered();
+  error InvalidName(string name);
 
   constructor(string memory _tld) payable ERC721("YSM Name Service", "YNS") {
     // NFT Collection's Name, NFT's Symbol
     owner = payable(msg.sender);
     tld = _tld;
     console.log("%s name service deployed", _tld);
+  }
+
+  function getAllNames() public view returns (string[] memory) {
+    console.log("Getting all names from contract");
+    // initialize array with the size needed
+    string[] memory allNames = new string[](_tokenIds.current());
+    for (uint i = 0; i<_tokenIds.current(); i++) {
+      allNames[i] = names[i];
+    }
+    return allNames;
   }
 
   function price(string calldata name) public pure returns(uint) {
@@ -42,8 +57,13 @@ contract Domains is ERC721URIStorage {
     }
   }
 
+  function valid(string calldata name) public pure returns(bool) {
+    return StringUtils.strlen(name) >= 3 && StringUtils.strlen(name) <= 10;
+  }
+
   function register(string calldata name) public payable {
-    require(domains[name] == address(0), "Domain is taken"); // Must be available
+    if (domains[name] != address(0)) revert AlreadyRegistered();
+    if (!valid(name)) revert InvalidName(name);
 
     uint256 _price = price(name);
     require(msg.value >= _price, "Not enough MATIC paid");
@@ -77,6 +97,7 @@ contract Domains is ERC721URIStorage {
     _safeMint(msg.sender, newRecordId);
     _setTokenURI(newRecordId, finalTokenUri);
     domains[name] = msg.sender;
+    names[newRecordId] = name;
 
     _tokenIds.increment();
   }
