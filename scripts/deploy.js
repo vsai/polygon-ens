@@ -10,13 +10,13 @@ async function main() {
   const tld = "ysm";
   const domainName = "fruitsrus";
 
-  // const domainContractFactory = await hre.ethers.getContractFactory('Domains');
-  // const domainContract = await domainContractFactory.deploy(tld);
-  // await domainContract.deployed();
-  // console.log("Contract deployed to:", domainContract.address);
+  const domainContractFactory = await hre.ethers.getContractFactory('Domains');
+  const domainContract = await domainContractFactory.deploy(tld);
+  await domainContract.deployed();
+  console.log("Contract deployed to:", domainContract.address);
 
-  const contractAddress = "0x4f407294c7336835d079d59c1db64500ed86ae34";
-  const domainContract = await hre.ethers.getContractAt("Domains", contractAddress);
+  // const contractAddress = "0x726A35006E7C763004a2557FF581e81E39faB77F";
+  // const domainContract = await hre.ethers.getContractAt("Domains", contractAddress);
 
   let txn = await domainContract.register(domainName, { value: hre.ethers.utils.parseEther("0.1") });
   await txn.wait();
